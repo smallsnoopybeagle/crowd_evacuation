@@ -45,7 +45,9 @@ Resetbutton.onclick = function()
 		{
 		x[i] = Math.round(xmax*Math.random()); //initialise the position of each person
 		y[i] = Math.round(ymax*Math.random());
-	 	vx[i] = Math.round(2*Math.random() + 1); //initialise the velocity of each person
+	 	vx[i] = Math.round(2*Math.random() + 1); 
+		//initialise the velocity of each person
+		//velocity is between 1 and 3 and random generates a real number between 0 and 1
 		vy[i] = Math.round(2*Math.random() - 1);
 		if (vx[i]==0) vx[i] = Math.round(2*Math.random() + 1);
 		if (vy[i]==0) vy[i] = Math.round(2*Math.random() - 1);
