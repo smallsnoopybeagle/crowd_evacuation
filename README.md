@@ -9,6 +9,13 @@ start executing our ideas?
 
 
 what are we gonna vary? 
- - density of people
- - obstacles
- - acceleration
+- density of people (done)
+- width of passage (done)
+- acceleration (panic)
+- ppl grouped tgt (family)
+
+Changelog
+
+14/5: new movement pattern for the people - they actually go somewhere and not just straight! 
+Also removed ppl leaking from side of walls
+Wall design changed to single gap in middle - makes our life easier
