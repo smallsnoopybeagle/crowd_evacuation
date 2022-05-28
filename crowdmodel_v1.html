@@ -37,6 +37,7 @@ c.font = "50px Arial";
 var Startbutton = document.getElementById("Startbutton"), Resetbutton = document.getElementById("Resetbutton");
 var wslider = document.getElementById("wSlider");
 var wslidervalue = 200, N = 200;
+//Dont let N go beyond 1000 if you dont want comp to die
 Startbutton.onclick = function() {interval = setInterval(Calculate, 15);Startbutton.disabled = true;}
 Resetbutton.onclick = function() 
 	{
@@ -89,7 +90,7 @@ wslider.oninput = function()
 //yeewh assumes the acceleration is constant unless collision
 //and the acceleration is infinite
 var w = 1000, h = 1000;
-var x = [], y = [], vx = [], vy = [], target_x = [], target_y = [], radius = [];		//arrays containing the positions, velocities and radii of all the people
+var x = [], y = [], vx = [], vy = [], target_x = [], target_y = [], radius = [], acc = [], panic = [];		//arrays containing the positions, velocities and radii of all the people
 var interval, xmin = 0, xmax = w/2, ymin = 0, ymax = h; 
 //half and half walls
 //there is more spaghetti code here than the western stall jk lol
@@ -100,6 +101,8 @@ for (var i=0 ; i<N ; i++)
 	y[i] = Math.round(ymax*Math.random());
  	vx[i] = Math.round(2*Math.random() + 1); //initialise the velocity of each person
 	vy[i] = Math.round(2*Math.random() - 1);
+	acc[i] = 0;
+	panic[i] = 1;
 	target_x[i] = w/2;
 	target_y[i] = h/2;
 	if (vx[i]==0) vx[i] = Math.round(2*Math.random() + 1);
@@ -139,18 +142,27 @@ c.fillText("Door width = " + doorwidth, w/2 + 20, h-10);
 
 for (var i=0 ; i<N ; i++)	//move each person
 	{
-		/*
-	if (Math.abs(vx[i]) <= 1 || Math.abs(vy[i]) <= 1) 	//if a particle is too slow, randomise its speed
+	panic[i] = panic[i]*0.5; //people do take a while to calm down
+	if (Math.sign(vx[i]) * Math.sqrt(vx[i]**2 + vy[i]**2) + acc[i] <= 1 ) 	//if a particle is too slow, make the bugger hurry up
 		//do we need this loop idek
 		{
-		vx[i] = Math.round(2*Math.random() + 1);
-		vy[i] = Math.round(2*Math.random() - 1);
+		acc[i] = 1;
 		}
-		*/
+	if (Math.sign(vx[i]) * Math.sqrt(vx[i]**2 + vy[i]**2) + acc[i] > 4 ) 	//if a particle is too fast, scale speed down by random scale
+		//do we need this loop idek
+		{
+		newvelo = Math.sqrt(10) - 1 + Math.random(); //so between max speed and max speed - 2
+		vx[i] = newvelo*vx[i]/Math.sqrt(vx[i]**2 + vy[i]**2);
+		vy[i] = newvelo*vy[i]/Math.sqrt(vx[i]**2 + vy[i]**2);
+		}
 	//MoveToTarget(x[i], y[i], target_x[i], target_y[i], vx[i], vy[i])
-	velo = Math.sqrt(vx[i]**2 + vy[i]**2);
+	velo = Math.sign(vx[i]) * Math.sqrt(vx[i]**2 + vy[i]**2) + acc[i];
 	//console.log("func velo " + velo);
 	angle = Math.atan((y[i]-target_y[i])/(x[i]-target_x[i]));
+	if((w/2 - x[i] < vx[i] + radius[i] + 10) && ((y[i] >= h/2 + doorwidth/2) || (y[i] <= h/2 - doorwidth/2)))
+		{
+		angle = Math.PI*Math.sign(y[i] - h/2)/2;
+		};
 	//console.log("func angle " + angle)
 	vy[i] = velo*((Math.sin(angle)));
 	vx[i] = velo*(Math.abs(Math.cos(angle)));
@@ -161,30 +173,41 @@ for (var i=0 ; i<N ; i++)	//move each person
 	//console.log("func xpos " + x[i]);
 	//console.log("func ypos " + y[i]);
 	//console.log("\n");
+	acc[i]=acc[i]/2;
+	if (Math.abs(acc[i]) < 0.1) acc[i] = 0;
 	if (x[i] <= radius[i])		//person has hit the left wall
 		{
-		console.log("hit\n");
+		//console.log("hit\n");
 		x[i] = x[i] + radius[i] - vx[i];	//move person back
 		vx[i] = Math.round(2*Math.random() + 1);
 		}
 	if ((x[i] - vx[i] <= w/2) && (x[i] >= w/2)  && ((y[i] >= h/2 + doorwidth/2) || (y[i] <= h/2 - doorwidth/2))) //person has hit the row of doors
 		{
-		console.log("hit\n");
-		x[i] = x[i] - radius[i] - 5;
+		//console.log("hit\n");
+		x[i] = x[i] - radius[i];
 		vx[i] = Math.round(2*Math.random() - 4);			//cannot move right anymore
 		vy[i] = Math.round(2*Math.random() - 1);
+		acc[i] = 0.5;
+		panic[i]*= 2;
+		/*
+		vx[i] = 0;			//cannot move right anymore
+		vy[i] = Math.sqrt(vx[i]**2 + vy[i]**2);
+		*/
 		}
 	if (y[i] <= radius[i]) 			//person has hit the top wall
 		{
-		console.log("hit\n");
+		//console.log("hit\n");
 		y[i] = radius[i];		//move person back
-		vy[i] = -vy[i];			//reverse the velocity
+		vy[i] = Math.round(1 - Math.random());			//reverse the velocity
+		acc[i] = 0.5*panic[i];
 		}
 	if (y[i] >= ymax - radius[i]) 		//person has hit the bottom wall
 		{
-		console.log("hit\n");
+		//console.log("hit\n");
 		y[i] = ymax - radius[i];	//move person back
-		vy[i] = -vy[i];			//reverse the velocity
+		vy[i] = Math.round(Math.random() - 1);			//reverse the velocity
+		acc[i] = 0.5*panic[i];
+
 		}
 	for (var j=0 ; j < N; j++) 	//check whether this person have collided with any other
 		{
@@ -193,7 +216,8 @@ for (var i=0 ; i<N ; i++)	//move each person
 		var distance = Math.sqrt(dx*dx + dy*dy);			//distance between the 2 people
 		if (i != j && distance <= 1.1*(radius[i] + radius[j])) 	//two people have collided
 			{
-			console.log("hit person\n");
+			//console.log("hit person\n");
+			panic[i] *= 1.2; 
 			x[i] = x[i] - vx[i];			//back to original position
 			y[i] = y[i] - vy[i];
 			var temp = vx[i];			//exchange velocities
@@ -207,6 +231,7 @@ for (var i=0 ; i<N ; i++)	//move each person
 				vx[i] = Math.round(2*Math.random() - 4);		//cannot move right anymore
 				vx[j] = Math.round(2*Math.random() - 4);
 				vy[i] = Math.round(2*Math.random() - 1);
+				if (panic[i] < 2 ) {acc[i] = 0.5*panic[i]};
 				}
 			if (x[j] <= w/2 && x[j] + vx[j] >= w/2 && ((y[j] >= h/2 + doorwidth/2) || (y[j] <= h/2 - doorwidth/2)) && ((y[i] >= h/2 + doorwidth/2) || (y[i] <= h/2 - doorwidth/2))) //person has hit the row of doors
 				{
@@ -214,6 +239,7 @@ for (var i=0 ; i<N ; i++)	//move each person
 				vx[i] = Math.round(2*Math.random() - 4);		//cannot move right anymore
 				vx[j] = Math.round(2*Math.random() - 4);
 				vy[j] = Math.round(2*Math.random() - 1);
+				if (panic[i] < 2 ) {acc[i] = 0.5*panic[i]};
 				}
 			if (x[i] < w/2 && w/2 - x[i] < 10 && ((y[i] >= h/2 + doorwidth/2) || (y[i] <= h/2 - doorwidth/2)))	//the person is near the row of doors
 				x[i] = x[i] + Math.round(2*Math.random() - 4)		//try to get out
@@ -222,13 +248,22 @@ for (var i=0 ; i<N ; i++)	//move each person
 			temp = vy[i];			//exchange velocities
 			vy[i] = vy[j];
 			vy[j] = temp;
+			if (panic[i] < 2 ) {acc[i] = 0.5*panic[i]};
 			} //end of if (i != j)
 		} //end of for j
 	} //end of for i
 
-c.fillStyle="steelblue";
+//c.fillStyle="steelblue";
 for (var i=0; i<N; i++)		//draw each person		
 	{
+		//dont get scared by the numbers panic is a logarithmic scale
+		//1000000000 is only 3 times as big as 1000
+		//red = panicking
+		//green = close to die/shitting pants
+		//numbers are arbitrary
+	if(panic[i] >= 1000000000) {c.fillStyle="green";}
+	else if((panic[i] < 1000000000) && (panic[i] >= 1000)) {c.fillStyle="red"}
+	else {c.fillStyle="steelblue"}
 	c.beginPath();
 	c.arc(x[i], y[i], radius[i], 0, 2*Math.PI);
 	c.fill(); 
