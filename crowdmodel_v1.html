@@ -143,7 +143,7 @@ c.fillText("Door width = " + doorwidth, w/2 + 20, h-10);
 for (var i=0 ; i<N ; i++)	//move each person
 	{
 	panic[i] = panic[i]*0.5; //people do take a while to calm down
-	if (Math.sign(vx[i]) * Math.sqrt(vx[i]**2 + vy[i]**2) + acc[i] <= 1 ) 	//if a particle is too slow, make the bugger hurry up
+	if ((Math.sign(vx[i]) * Math.sqrt(vx[i]**2 + vy[i]**2) + acc[i] <= 1 ) && (acc[i] < 0.4)) 	//if a particle is too slow, make the bugger hurry up
 		//do we need this loop idek
 		{
 		acc[i] = 1;
@@ -164,7 +164,9 @@ for (var i=0 ; i<N ; i++)	//move each person
 		angle = Math.PI*Math.sign(y[i] - h/2)/2;
 		};
 	//console.log("func angle " + angle)
+	//if ((acc[i] < 0.4)||(vy[i]>0)) { very dubious if statement causes people to move back should make wall-specific
 	vy[i] = velo*((Math.sin(angle)));
+	//}
 	vx[i] = velo*(Math.abs(Math.cos(angle)));
 	//console.log("func velox " + vx[i]);
 	//console.log("func veloy " + vy[i]);
@@ -181,7 +183,7 @@ for (var i=0 ; i<N ; i++)	//move each person
 		x[i] = x[i] + radius[i] - vx[i];	//move person back
 		vx[i] = Math.round(2*Math.random() + 1);
 		}
-	if ((x[i] - vx[i] <= w/2) && (x[i] >= w/2)  && ((y[i] >= h/2 + doorwidth/2) || (y[i] <= h/2 - doorwidth/2))) //person has hit the row of doors
+	if (((x[i] < 500) && (x[i] > 480)) && ((y[i] >= h/2 + doorwidth/2) || (y[i] <= h/2 - doorwidth/2)))  //person has hit the row of doors
 		{
 		//console.log("hit\n");
 		x[i] = x[i] - radius[i];
