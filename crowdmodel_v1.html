@@ -225,7 +225,7 @@ for (var i=0 ; i<N ; i++)	//move each person
 		var dx = x[i] - x[j];
 		var dy = y[i] - y[j];
 		var distance = Math.sqrt(dx*dx + dy*dy);			//distance between the 2 people
-		if (i != j && distance <= 1.06*(radius[i] + radius[j])) 	//two people have collided
+		if (i != j && distance <= 1.15*(radius[i] + radius[j])) 	//two people have collided
 			//46 cm ducking radius number here is 46/2*20 = 1.06
 			{
 			//console.log("hit person\n");
