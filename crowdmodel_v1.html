@@ -172,7 +172,7 @@ for (var i=0 ; i<N ; i++)	//move each person
 	velo = Math.sign(vx[i]) * Math.sqrt(vx[i]**2 + vy[i]**2) + acc[i];
 	//console.log("func velo " + velo);
 	angle = Math.atan((y[i]-target_y[i])/(x[i]-target_x[i]));
-	if(((w/2 - x[i] < vx[i] + radius[i] + 20) && ((y[i] >= h/2 + doorwidth/2 + 10 ) || (y[i] <= h/2 - doorwidth/2))) || hitawall[i] > 0)
+	if(((w/2 - x[i] < vx[i] + radius[i] + 20) && ((y[i] >= h/2 + doorwidth/2) || (y[i] <= h/2 - doorwidth/2))) || hitawall[i] > 0)
 		//when we actually hit a wall or we have hit a wall not long ago
 		{
 		angle = -1*Math.PI*Math.sign(y[i] - h/2)/2;
@@ -209,18 +209,20 @@ for (var i=0 ; i<N ; i++)	//move each person
 		vy[i] = Math.sqrt(vx[i]**2 + vy[i]**2);
 		*/
 		}
-	if (y[i] <= radius[i]) 			//person has hit the top wall
+	if (y[i] <= radius[i] + vy[i]) 			//person has hit the top wall
 		{
 		//console.log("hit\n");
 		y[i] = radius[i];		//move person back
-		vy[i] = Math.round(1 - Math.random());			//reverse the velocity
+		vy[i] = (0.6*Math.random() - 1.77);			//reverse the velocity
+		vx[i] = 0;
 		acc[i] = 0.5*panic[i];
 		}
-	if (y[i] >= ymax - radius[i]) 		//person has hit the bottom wall
+	if (y[i] >= ymax - radius[i] - vy[i]) 		//person has hit the bottom wall
 		{
 		//console.log("hit\n");
 		y[i] = ymax - radius[i];	//move person back
-		vy[i] = Math.round(Math.random() - 1);			//reverse the velocity
+		vy[i] = (0.6*Math.random() - 1.77);			//reverse the velocity
+		vx[i] = 0;
 		acc[i] = 0.5*panic[i];
 
 		}
@@ -234,6 +236,23 @@ for (var i=0 ; i<N ; i++)	//move each person
 		var dx = x[i] - x[j];
 		var dy = y[i] - y[j];
 		var distance = Math.sqrt(dx*dx + dy*dy);			//distance between the 2 people
+		if (y[i] <= radius[i] + vy[i]) 			//person has hit the top wall
+		{
+		//console.log("hit\n");
+		y[i] = radius[i];		//move person back
+		vy[i] = (0.6*Math.random() - 1.77);			//reverse the velocity
+		vx[i] = 0;
+		acc[i] = 0.5*panic[i];
+		}
+	if (y[i] >= ymax - radius[i] - vy[i]) 		//person has hit the bottom wall
+		{
+		//console.log("hit\n");
+		y[i] = ymax - radius[i];	//move person back
+		vy[i] = (0.6*Math.random() - 1.77);			//reverse the velocity
+		vx[i] = 0;
+		acc[i] = 0.5*panic[i];
+
+		}
 		if ((i != j && distance <= 1.15*(radius[i] + radius[j])) && (vx[i]/vy[i] != vx[j]/vy[j])) 	//two people have collided in not the same direction
 			//46 cm ducking radius number here is 46/2*20 = 1.06
 			{
@@ -266,7 +285,7 @@ for (var i=0 ; i<N ; i++)	//move each person
 				hitawall[i] = timer[i];
 				if (panic[i] < 16 ) {acc[i] = 0.5*panic[i]};
 				}
-			if ((x[i]  + vx[i] < w/2 && w/2 - x[i] < 10 && ((y[i] >= h/2 + doorwidth/2) || (y[i] <= h/2 - doorwidth/2))) && hitawall[i] == 0)	//the person is near the row of doors
+			if ((x[i]  + vx[i] < w/2 && w/2 - x[i] < 20 && ((y[i] >= h/2 + doorwidth/2) || (y[i] <= h/2 - doorwidth/2))) && hitawall[i] == 0)	//the person is near the row of doors
 				{x[i] = x[i] + (0.6*Math.random() - 1.77);
 				vx[j] = (0.6*Math.random() - 1.77);
 				vy[i] = 0;
@@ -305,8 +324,10 @@ for (var i=0; i<N; i++)		//draw each person
 		//red = panicking
 		//green = close to die/shitting pants
 		//numbers are arbitrary
-	if(panic[i] >= 1000000000) {c.fillStyle="green";}
-	else if((panic[i] < 1000000000) && (panic[i] >= 1000)) {c.fillStyle="red"}
+	if(panic[i] >= 100000000) {c.fillStyle="green";
+	panic[i] = 100000000;}
+
+	else if((panic[i] < 100000000) && (panic[i] >= 1000)) {c.fillStyle="red"}
 	else {c.fillStyle="steelblue"}
 	c.beginPath();
 	c.arc(x[i], y[i], radius[i], 0, 2*Math.PI);
@@ -329,3 +350,4 @@ for (var i=0; i<N; i++)		//draw each person
 <BR><BR><BR><BR><BR><BR><BR><BR><BR><BR>
 </BODY>
 </HTML>
+
